@@ -22,6 +22,7 @@ class Category(MPTTModel):
     thumbnail = models.ImageField(upload_to=THUMBNAIL_UPLOAD_PATH, null=True, blank=True)
     order = models.IntegerField(blank=True, null=True)
     slug = models.SlugField()
+    active = models.BooleanField(default=False, blank=True)
     alternate_title = models.CharField(
         blank=True,
         default="",
