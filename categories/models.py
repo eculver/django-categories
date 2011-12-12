@@ -53,7 +53,8 @@ class Category(MPTTModel):
     class Meta:
         verbose_name_plural = 'categories'
         unique_together = ('parent', 'name')
-        ordering = ('tree_id', 'lft')
+        ordering = ('-active', 'order',)
+        #ordering = ('tree_id', 'lft', '-active',)
     
     class MPTTMeta:
         verbose_name_plural = 'categories'
@@ -63,7 +64,8 @@ class Category(MPTTModel):
         
     def __unicode__(self):
         ancestors = self.get_ancestors()
-        return ' > '.join([force_unicode(i.name) for i in ancestors]+[self.name,])
+        active = ' (active)' if self.active else ''
+        return ' > '.join([force_unicode(i.name) for i in ancestors]+[self.name + active])
         
 if RELATION_MODELS:
     category_relation_limits = reduce(lambda x,y: x|y, RELATIONS)
