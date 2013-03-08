@@ -1,3 +1,6 @@
+from django.core.exceptions import ImproperlyConfigured
+
+
 __version_info__ = {
     'major': 0,
     'minor': 5,
@@ -5,6 +8,7 @@ __version_info__ = {
     'releaselevel': 'final',
     'serial': 0
 }
+
 
 def get_version():
     vers = ["%(major)i.%(minor)i" % __version_info__, ]
@@ -31,15 +35,18 @@ try:
     registry = {}
 
     def register_m2m(model, field_name='categories', extra_params={}):
-        return _register(model, field_name, extra_params, fields.CategoryM2MField)
-    
+        return _register(model, field_name, extra_params,
+                fields.CategoryM2MField)
+
     def register_fk(model, field_name='category', extra_params={}):
-        return _register(model, field_name, extra_params, fields.CategoryFKField)
-    
-    def _register(model, field_name, extra_params={}, field=fields.CategoryFKField):
+        return _register(model, field_name, extra_params,
+                fields.CategoryFKField)
+
+    def _register(model, field_name, extra_params={},
+            field=fields.CategoryFKField):
         registry_name = "%s.%s" % (model.__name__, field_name)
         if registry_name in registry:
-            return #raise AlreadyRegistered
+            return  # raise AlreadyRegistered
         registry[registry_name] = model
         opts = model._meta
         try:
@@ -47,4 +54,6 @@ try:
         except FieldDoesNotExist:
             field(**extra_params).contribute_to_class(model, field_name)
 except ImportError:
+    pass
+except ImproperlyConfigured:
     pass
