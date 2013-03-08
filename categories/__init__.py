@@ -1,59 +1,30 @@
-from django.core.exceptions import ImproperlyConfigured
-
 
 __version_info__ = {
-    'major': 0,
-    'minor': 5,
-    'micro': 2,
+    'major': 1,
+    'minor': 1,
+    'micro': 4,
     'releaselevel': 'final',
-    'serial': 0
+    'serial': 1
 }
 
 
-def get_version():
+def get_version(short=False):
+    assert __version_info__['releaselevel'] in ('alpha', 'beta', 'final')
     vers = ["%(major)i.%(minor)i" % __version_info__, ]
-
-    if __version_info__['micro']:
+    if __version_info__['micro'] and not short:
         vers.append(".%(micro)i" % __version_info__)
-    if __version_info__['releaselevel'] != 'final':
-        vers.append('%(releaselevel)s%(serial)i' % __version_info__)
+    if __version_info__['releaselevel'] != 'final' and not short:
+        vers.append('%s%i' % (__version_info__['releaselevel'][0], __version_info__['serial']))
     return ''.join(vers)
 
 __version__ = get_version()
 
+
 try:
-    import fields
-
-    from django.db.models import FieldDoesNotExist
-
-    class AlreadyRegistered(Exception):
-        """
-        An attempt was made to register a model more than once.
-        """
-        pass
-
-    registry = {}
-
-    def register_m2m(model, field_name='categories', extra_params={}):
-        return _register(model, field_name, extra_params,
-                fields.CategoryM2MField)
-
-    def register_fk(model, field_name='category', extra_params={}):
-        return _register(model, field_name, extra_params,
-                fields.CategoryFKField)
-
-    def _register(model, field_name, extra_params={},
-            field=fields.CategoryFKField):
-        registry_name = "%s.%s" % (model.__name__, field_name)
-        if registry_name in registry:
-            return  # raise AlreadyRegistered
-        registry[registry_name] = model
-        opts = model._meta
-        try:
-            opts.get_field(field_name)
-        except FieldDoesNotExist:
-            field(**extra_params).contribute_to_class(model, field_name)
+    from categories import settings
+    from categories.registration import (_process_registry, register_fk,
+                                        register_m2m)
+    _process_registry(settings.FK_REGISTRY, register_fk)
+    _process_registry(settings.M2M_REGISTRY, register_m2m)
 except ImportError:
-    pass
-except ImproperlyConfigured:
     pass
