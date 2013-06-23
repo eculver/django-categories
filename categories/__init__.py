@@ -1,9 +1,9 @@
 
 __version_info__ = {
     'major': 1,
-    'minor': 1,
-    'micro': 4,
-    'releaselevel': 'final',
+    'minor': 2,
+    'micro': 2,
+    'releaselevel': 'beta',
     'serial': 1
 }
 
@@ -26,5 +26,5 @@ try:
                                         register_m2m)
     _process_registry(settings.FK_REGISTRY, register_fk)
     _process_registry(settings.M2M_REGISTRY, register_m2m)
-except ImportError:
+except:
     pass
